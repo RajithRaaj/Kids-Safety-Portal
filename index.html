@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Kids Safety Portal</title> <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.11.0/lottie.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        :root {
+            --card-width: 340px;
+            --card-height: 550px;
+            --dark-bg: #0d1117;
+            --dark-card-bg: rgba(22, 27, 34, 0.7);
+            --dark-border: rgba(50, 100, 150, 0.4);
+            --dark-text: #e6edf3;
+            --dark-neon-glow: #0ff;
+            --light-bg: #f0f2f5;
+            --light-card-bg: rgba(255, 255, 255, 0.8);
+            --light-border: rgba(150, 150, 150, 0.3);
+            --light-text: #1a202c;
+            --light-neon-glow: #f0f;
+        }
+        html {
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 5vh;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            perspective: 1000px;
+            position: relative;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        body.light-theme {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+        }
+        .particle-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            background-color: rgba(100, 200, 255, 0.7);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particle-fade-in-out 10s infinite;
+            filter: blur(1px);
+        }
+        @keyframes particle-fade-in-out {
+            0% { opacity: 0; transform: translate(var(--x, 0), var(--y, 0)) scale(0.5); }
+            50% { opacity: 0.8; transform: translate(var(--x, 0), var(--y, 0)) scale(1); }
+            100% { opacity: 0; transform: translate(var(--x, 0), var(--y, 0)) scale(0.5); }
+        }
+        .card-container {
+            width: var(--card-width);
+            height: var(--card-height);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.5s ease, border-color 0.5s ease;
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-card-bg);
+            border: 2px solid var(--dark-border);
+            border-radius: 2rem;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            color: var(--dark-text);
+            overflow: hidden;
+        }
+        body.light-theme .card-front,
+        body.light-theme .card-back {
+            background: var(--light-card-bg);
+            border: 2px solid var(--light-border);
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+        .card-container.flipped .card-front {
+            transform: rotateY(-180deg);
+        }
+        .card-container.flipped .card-back {
+            transform: rotateY(0deg);
+        }
+        #lottie-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
+            background-size: 400% 400%;
+            border-radius: 2.2rem;
+            z-index: -2;
+            animation: gradient-pulse 4s ease infinite;
+            filter: blur(10px);
+        }
+        @keyframes gradient-pulse {
+            0% { background-position: 0% 50%; opacity: 0.7; }
+            50% { background-position: 100% 50%; opacity: 1; }
+            100% { background-position: 0% 50%; opacity: 0.7; }
+        }
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid var(--dark-neon-glow);
+            object-fit: cover;
+            box-shadow: 0 0 15px var(--dark-neon-glow);
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        body.light-theme .profile-img {
+            border: 3px solid var(--light-neon-glow);
+            box-shadow: 0 0 15px var(--light-neon-glow);
+        }
+        .name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        .tagline {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        body.light-theme .tagline {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        .micro-stats span {
+            font-size: 0.9rem;
+            background: rgba(0, 255, 255, 0.1);
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.5rem;
+            margin: 0 0.2rem;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        body.light-theme .micro-stats span {
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+        }
+        .social-icons a, .action-button {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .social-icons a:hover, .action-button:hover {
+            color: var(--dark-neon-glow);
+            text-shadow: 0 0 10px var(--dark-neon-glow);
+        }
+        body.light-theme .social-icons a:hover, body.light-theme .action-button:hover {
+            color: var(--light-neon-glow);
+            text-shadow: 0 0 10px var(--light-neon-glow);
+        }
+        .social-icons a::before, .action-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        .social-icons a:hover::before, .action-button:hover::before {
+            left: 100%;
+        }
+        .action-button {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        body.light-theme .action-button {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid rgba(255, 0, 255, 0.5);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .action-button:hover {
+            background: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+        body.light-theme .action-button:hover {
+            background: rgba(255, 0, 255, 0.4);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            padding: 0.75rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.3s ease;
+        }
+        body.light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        body.light-theme .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 50;
+        }
+        .social-icons a:hover .tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 255, 0.7);
+            color: #0d1117;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+            opacity: 1;
+        }
+        body.light-theme .loading-overlay {
+            background: var(--light-bg);
+        }
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(0, 255, 255, 0.2);
+            border-top: 8px solid var(--dark-neon-glow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        body.light-theme .loader {
+            border: 8px solid rgba(255, 0, 255, 0.2);
+            border-top: 8px solid var(--light-neon-glow);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 640px) {
+            :root {
+                --card-width: 90vw;
+                --card-height: 85vh;
+            }
+            body {
+                padding: 1rem;
+                padding-top: 2vh;
+            }
+            .card-container {
+                margin: 0;
+            }
+            .theme-toggle {
+                padding: 0.6rem;
+                top: 1rem;
+                right: 1rem;
+            }
+            .profile-mode-switcher .flex {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            .profile-mode-switcher button {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+        .back-profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            border: 3px solid var(--dark-neon-glow);
+            box-shadow: 0 0 15px var(--dark-neon-glow);
+        }
+        body.light-theme .back-profile-img {
+            border: 3px solid var(--light-neon-glow);
+            box-shadow: 0 0 15px var(--light-neon-glow);
+        }
+        .card-footer-watermark {
+            margin-top: 2rem;
+            text-align: center;
+            padding-bottom: 1rem;
+            z-index: 1;
+        }
+        #aboutSection {
+            background: var(--dark-card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 2rem;
+            text-align: left;
+            display: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--dark-neon-glow);
+            border-radius: 10px;
+        }
+        body.light-theme .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--light-neon-glow);
+        }
+        #backMainContent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            flex-grow: 1;
+            width: 100%;
+            overflow-y: auto;
+            padding-bottom: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        #backMainContent::-webkit-scrollbar {
+            width: 6px;
+        }
+        #backMainContent::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        #backMainContent::-webkit-scrollbar-thumb {
+            background: var(--dark-neon-glow);
+            border-radius: 10px;
+        }
+        body.light-theme #backMainContent::-webkit-scrollbar-thumb {
+            background: var(--light-neon-glow);
+        }
+        .profile-mode-switcher .flex {
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .profile-mode-switcher button {
+            padding: 0.5rem 0.8rem;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+    </div>
+    <div class="particle-bg" id="particleBg"></div>
+    <div class="card-container" id="cardContainer">
+        <div class="card card-front" id="cardFront">
+            <button id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon text-xl text-white"></i>
+            </button>
+            <div id="lottie-background"></div>
+            <div class="flex flex-col items-center gap-2">
+                <img src="https://i.ibb.co/hK780S2/Gemini-Generated-Image-7c6h407c6h407c6h.jpg" alt="Child Safety Icon" class="profile-img" id="profileImage"> <h1 class="name" id="profileName">Arjun S.</h1> <p class="tagline" id="profileTagline">Safe & Sound - Contact Guardian</p> <div class="micro-stats flex justify-center gap-2">
+                </div>
+            </div>
+            <div class="flex flex-col items-center gap-2 w-full flex-grow">
+                <div class="contact-info text-center">
+                    <p class="text-lg"><i class="fas fa-id-card-clip mr-2"></i> Child ID: <span id="childID" class="font-bold">KS-2025A1</span></p> <p class="text-lg mt-2"><i class="fas fa-phone mr-2"></i> Primary Guardian: <span id="phoneNumber" class="cursor-pointer hover:underline">+91 99999 12345</span></p> <p class="text-lg mt-2"><i class="fas fa-envelope mr-2"></i> Guardian Email: <span id="emailAddress" class="cursor-pointer hover:underline">guardian.email@example.com</span></p> </div>
+                <div class="social-icons flex gap-6 text-3xl mt-2">
+                </div>
+                <div class="action-buttons flex flex-wrap justify-center gap-4 w-full px-4 mt-2">
+                    <button class="action-button" id="callGuardianBtn"><i class="fas fa-phone-volume"></i> Call Guardian</button> <button class="action-button" id="reportFoundBtn"><i class="fas fa-bullhorn"></i> Report Found Child</button> </div>
+            </div>
+        </div>
+        <div class="card card-back" id="cardBack">
+            <h2 class="text-3xl font-bold mb-6 mt-4">Ensuring Child Safety & Well-being</h2> <img src="https://i.ibb.co/hK780S2/Gemini-Generated-Image-7c6h407c6h407c6h.jpg" alt="Child Safety Icon Back" class="back-profile-img"> <div class="flex flex-col items-center gap-4 mt-6" id="backMainContent">
+                <button class="action-button" id="aboutMeButton"><i class="fas fa-child"></i> About This Child</button> <button class="action-button" id="copyGuardianPhoneBack"><i class="fas fa-phone"></i> Copy Guardian Phone</button>
+                <button class="action-button" id="copyGuardianEmailBack"><i class="fas fa-envelope"></i> Copy Guardian Email</button>
+                <div class="profile-mode-switcher flex flex-col items-center gap-3 mt-4">
+                    <p class="text-sm text-gray-400">Explore Child's Profile:</p> <div class="flex flex-wrap justify-center gap-2">
+                        <button class="action-button text-sm px-3 py-1.5" data-mode="Safety Info">Safety Info</button> <button class="action-button text-sm px-3 py-1.5" data-mode="Academics & School">Academics & School</button> <button class="action-button text-sm px-3 py-1.5" data-mode="Hobbies (Gym)">Hobbies (Gym)</button> </div>
+                </div>
+            </div>
+            <div id="aboutSection" class="absolute inset-0 flex flex-col justify-between p-6 opacity-0 pointer-events-none transition-opacity duration-300">
+                <button id="backToMainBack" class="absolute top-4 left-4 text-xl text-gray-300 hover:text-white focus:outline-none z-30">
+                    <i class="fas fa-arrow-left mr-2"></i> Back
+                </button>
+                <div class="flex-grow overflow-y-auto custom-scrollbar text-gray-300 leading-relaxed">
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="text-xs text-gray-500 card-footer-watermark">
+        Elite Kids Safety Portal | <a href="https://zenora-ai.vercel.app/" target="_blank" rel="noopener noreferrer" class="hover:underline">SecureKid ©</a> </p>
+
+    <div id="toast" class="toast"></div>
+    <script>
+        // --- Configuration & Data ---
+        const profileData = {
+            "Safety Info": { // Main Safety Mode
+                name: "Arjun S.", // **REQUIRED: Child's Full Name**
+                tagline: "Safe & Sound - Contact Guardian",
+                phoneNumber: "+91 99999 12345", // **REQUIRED: Primary Guardian's Phone (front-facing)**
+                emailAddress: "guardian.email@example.com", // **REQUIRED: Primary Guardian's Email**
+                childID: "KS-2025A1", // **REQUIRED: Unique Child ID (e.g., school ID, custom ID)**
+                microStats: ["Guardian Contact", "Emergency Ready", "Child ID"],
+                social: {
+                    // No social links for this section as per safety focus
+                },
+                about: `
+                    <h3 class="text-2xl font-bold text-center mb-4 mt-12">About Arjun S.</h3>
+                    <p class="text-base text-gray-300 text-center flex-grow overflow-y-auto custom-scrollbar leading-relaxed">
+                        This portal is designed to ensure the safety and quick identification of Arjun S. in case of an emergency or if he gets separated from his guardians. Your cooperation in contacting the guardians is deeply appreciated.
+                    </p>
+                    <p>
+                        **Guardian Contacts:**
+                        <ul>
+                            <li>**Mom (Priya S.):** +91 98765 00000</li> <li>**Dad (Rajesh S.):** +91 98765 11111</li> <li>**Emergency Contact (Grandparent/Aunt/Uncle):** +91 98765 22222</li> <li>**Guardian Email:** guardian.email@example.com</li>
+                        </ul>
+                    </p>
+                    <p>
+                        **Residential Address:**
+                        <address>
+                            123, Safety Lane,<br>
+                            Orikkai,<br>
+                            Kanchipuram - 631502,<br>
+                            Tamil Nadu, India.
+                        </address>
+                    </p>
+                    <p>
+                        **Medical/Allergy Information:**
+                        <ul>
+                            <li>**Allergies:** No known severe allergies.</li>
+                            <li>**Medical Conditions:** None.</li>
+                            <li>**Emergency Notes:** None.</li>
+                            </ul>
+                    </p>
+                    <p>
+                        Thank you for helping us keep Arjun safe. Please use the contact details provided for urgent matters.
+                    </p>
+                `
+            },
+            "Academics & School": { // New Mode: Academics and School
+                name: "Arjun S.",
+                tagline: "His Academic Journey",
+                phoneNumber: "+91 99999 12345", // Still primary guardian number for quick call
+                emailAddress: "guardian.email@example.com",
+                childID: "KS-2025A1",
+                microStats: ["School Details", "Academic Progress", "Curricular"],
+                social: {
+                    // Example: School website or parent portal link if applicable
+                    website: "https://www.myschool.edu.in",
+                    // whatsapp: "https://api.whatsapp.com/send?phone=919999912345&text=Regarding%20Arjun's%20academics.", // If school uses WhatsApp for communication
+                },
+                about: `
+                    <h3 class="text-2xl font-bold text-center mb-4 mt-12">Arjun's Academics & School</h3>
+                    <p class="text-base text-gray-300 text-center flex-grow overflow-y-auto custom-scrollbar leading-relaxed">
+                        This section provides details about Arjun's school and academic life.
+                    </p>
+                    <p>
+                        **School Information:**
+                        <ul>
+                            <li>**School Name:** Elite Public School</li>
+                            <li>**Grade/Class:** Grade 5, Section B</li>
+                            <li>**Teacher:** Ms. Anjali Sharma</li>
+                            <li>**School Address:** 456, Learning Avenue, Orikkai, Kanchipuram - 631502</li>
+                            <li>**School Phone:** +91 44 2727 XXXX</li>
+                        </ul>
+                    </p>
+                    <p>
+                        **Academic Interests:**
+                        <ul>
+                            <li>**Favorite Subjects:** Science, Mathematics</li>
+                            <li>**Clubs/Activities:** Science Club, Chess Club</li>
+                            <li>**Current Projects:** Building a model of the solar system.</li>
+                        </ul>
+                    </p>
+                    <p>
+                        For school-related inquiries, please contact the school administration or his guardians.
+                    </p>
+                `
+            },
+            "Hobbies (Gym)": { // New Mode: Hobbies - Gym
+                name: "Arjun S.",
+                tagline: "His Passion for Fitness",
+                phoneNumber: "+91 99999 12345", // Still primary guardian number for quick call
+                emailAddress: "guardian.email@example.com",
+                childID: "KS-2025A1",
+                microStats: ["Fitness Enthusiast", "Gym Activities", "Healthy Lifestyle"],
+                social: {
+                    // Example: Gym's website or trainer's contact if applicable
+                    website: "https://www.fitnessforjuniors.in",
+                    // instagram: "https://www.instagram.com/juniorsgym", // If gym has an active social media
+                },
+                about: `
+                    <h3 class="text-2xl font-bold text-center mb-4 mt-12">Arjun's Hobbies: Gym & Fitness</h3>
+                    <p class="text-base text-gray-300 text-center flex-grow overflow-y-auto custom-scrollbar leading-relaxed">
+                        Arjun has a keen interest in physical fitness and regularly attends a supervised junior gym program.
+                    </p>
+                    <p>
+                        **Gym Details:**
+                        <ul>
+                            <li>**Gym Name:** Junior FitZone</li>
+                            <li>**Trainer:** Mr. Bala Murugan</li>
+                            <li>**Program:** Youth Strength & Conditioning</li>
+                            <li>**Schedule:** Mon, Wed, Fri (4:00 PM - 5:00 PM)</li>
+                            <li>**Gym Address:** 789, Fitness Road, Orikkai, Kanchipuram - 631502</li>
+                        </ul>
+                    </p>
+                    <p>
+                        **Interests & Goals:**
+                        <ul>
+                            <li>Enjoys bodyweight exercises and basic strength training.</li>
+                            <li>Aims to improve overall fitness and stamina.</li>
+                            <li>Loves participating in group fitness challenges.</li>
+                        </ul>
+                    </p>
+                    <p>
+                        For any gym or fitness related questions, please contact his guardians.
+                    </p>
+                `
+            }
+        };
+        let currentMode = 'Safety Info'; // Default mode for kids safety portal
+        let isFlipped = false;
+
+        // --- DOM Elements ---
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const cardContainer = document.getElementById('cardContainer');
+        const cardFront = document.getElementById('cardFront');
+        const cardBack = document.getElementById('cardBack');
+        const themeToggle = document.getElementById('themeToggle');
+        const toast = document.getElementById('toast');
+        // Profile details
+        const profileImage = document.getElementById('profileImage');
+        const profileName = document.getElementById('profileName');
+        const profileTagline = document.getElementById('profileTagline');
+        const childIDSpan = document.getElementById('childID'); // New element
+        const phoneNumberSpan = document.getElementById('phoneNumber');
+        const emailAddressSpan = document.getElementById('emailAddress');
+        const microStatsContainer = document.querySelector('.micro-stats');
+        // Action Buttons (Front)
+        const callGuardianBtn = document.getElementById('callGuardianBtn'); // New button
+        const reportFoundBtn = document.getElementById('reportFoundBtn'); // New button
+        // Action Buttons (Back)
+        const copyGuardianPhoneBackBtn = document.getElementById('copyGuardianPhoneBack');
+        const copyGuardianEmailBackBtn = document.getElementById('copyGuardianEmailBack');
+        const profileModeButtons = document.querySelectorAll('.profile-mode-switcher button');
+        const socialIconsContainer = document.querySelector('.social-icons');
+
+        // About Me Section DOM elements
+        const aboutMeButton = document.getElementById('aboutMeButton');
+        const aboutSection = document.getElementById('aboutSection');
+        const backToMainBack = document.getElementById('backToMainBack');
+        const backMainContent = document.getElementById('backMainContent');
+        const aboutContentContainer = document.querySelector('#aboutSection > div.flex-grow.overflow-y-auto.custom-scrollbar');
+
+
+        // --- Utility Functions ---
+        function hidePreloader() {
+            if (loadingOverlay) {
+                gsap.to(loadingOverlay, {
+                    opacity: 0,
+                    duration: 0.5,
+                    onComplete: () => {
+                        loadingOverlay.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+            triggerHapticFeedback();
+        }
+
+        function triggerHapticFeedback() {
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Copied!");
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                showToast("Failed to copy.");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // --- Core Logic ---
+        function updateCardContent(mode) {
+            const data = profileData[mode];
+            if (!data) return;
+            profileName.textContent = data.name;
+            profileTagline.textContent = data.tagline;
+            phoneNumberSpan.textContent = data.phoneNumber; // Front always shows guardian's primary number
+            emailAddressSpan.textContent = data.emailAddress; // Front always shows guardian's email
+            if (childIDSpan) childIDSpan.textContent = data.childID; // Update Child ID
+
+            microStatsContainer.innerHTML = '';
+            data.microStats.forEach(stat => {
+                const span = document.createElement('span');
+                span.textContent = stat;
+                microStatsContainer.appendChild(span);
+            });
+
+            socialIconsContainer.innerHTML = '';
+            // Only add social icons if they exist for the current mode and are appropriate
+            if (data.social.whatsapp) {
+                socialIconsContainer.innerHTML += `<a href="${data.social.whatsapp}" target="_blank" rel="noopener noreferrer" class="relative group"><i class="fab fa-whatsapp"></i><span class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 group-hover:opacity-100 group-hover:translate-y-0">WhatsApp</span></a>`;
+            }
+            if (data.social.website) {
+                socialIconsContainer.innerHTML += `<a href="${data.social.website}" target="_blank" rel="noopener noreferrer" class="relative group"><i class="fas fa-globe"></i><span class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 group-hover:opacity-100 group-hover:translate-y-0">Website</span></a>`;
+            }
+            if (data.social.facebook) {
+                socialIconsContainer.innerHTML += `<a href="${data.social.facebook}" target="_blank" rel="noopener noreferrer" class="relative group"><i class="fab fa-facebook"></i><span class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 group-hover:opacity-100 group-hover:translate-y-0">Facebook</span></a>`;
+            }
+            if (data.social.instagram) {
+                socialIconsContainer.innerHTML += `<a href="${data.social.instagram}" target="_blank" rel="noopener noreferrer" class="relative group"><i class="fab fa-instagram"></i><span class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 group-hover:opacity-100 group-hover:translate-y-0">Instagram</span></a>`;
+            }
+            if (data.social.youtube) {
+                socialIconsContainer.innerHTML += `<a href="${data.social.youtube}" target="_blank" rel="noopener noreferrer" class="relative group"><i class="fab fa-youtube"></i><span class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 group-hover:opacity-100 group-hover:translate-y-0">YouTube</span></a>`;
+            }
+
+
+            aboutContentContainer.innerHTML = data.about;
+
+            currentMode = mode;
+            showToast(`Switched to ${mode} section!`);
+            profileModeButtons.forEach(button => {
+                if (button.dataset.mode === mode) {
+                    button.classList.add('border-b-2', 'border-blue-400');
+                    button.classList.remove('border-transparent');
+                } else {
+                    button.classList.remove('border-b-2', 'border-blue-400');
+                    button.classList.add('border-transparent');
+                }
+            });
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                cardContainer.classList.add('flipped');
+                gsap.set(backMainContent, { opacity: 1, display: 'flex' });
+                gsap.set(aboutSection, { opacity: 0, display: 'none', pointerEvents: 'none' });
+            } else {
+                cardContainer.classList.remove('flipped');
+                gsap.set(aboutSection, { opacity: 0, display: 'none', pointerEvents: 'none' });
+                gsap.set(backMainContent, { opacity: 1, display: 'flex' });
+            }
+            triggerHapticFeedback();
+        }
+
+        // --- Visual Effects & Animations ---
+        function createParticles() {
+            const particleBg = document.getElementById('particleBg');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.setProperty('--x', `${Math.random() * 100}vw`);
+                particle.style.setProperty('--y', `${Math.random() * 100}vh`);
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                particleBg.appendChild(particle);
+            }
+        }
+
+        function loadLottieAnimation() {
+            // Lottie animation for child safety
+            lottie.loadAnimation({
+                container: document.getElementById('lottie-background'),
+                renderer: 'svg',
+                loop: true,
+                autoplay: true,
+                path: 'https://lottie.host/809f6103-605b-426b-951c-8b83dd49987f/cKxJj0aQfR.json' // Example Lottie: Child safety/protection (replace if needed)
+            });
+        }
+
+        function initTiltEffect() {
+            const card = document.querySelector('.card-container');
+            const sensitivity = 0.05;
+            document.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const rotateX = (e.clientY - centerY) * -sensitivity;
+                const rotateY = (e.clientX - centerX) * sensitivity;
+                gsap.to(card, {
+                    rotationX: rotateX,
+                    rotationY: rotateY,
+                    ease: "power2.out",
+                    duration: 0.5
+                });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    rotationX: 0,
+                    rotationY: 0,
+                    ease: "elastic.out(1, 0.3)",
+                    duration: 1.5
+                });
+            });
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', function(event) {
+                    const tiltX = (event.beta / 90) * 20;
+                    const tiltY = (event.gamma / 90) * 20;
+                    gsap.to(card, {
+                        rotationX: tiltX,
+                        rotationY: tiltY,
+                        ease: "power1.out",
+                        duration: 0.5
+                    });
+                });
+            }
+        }
+
+        // --- Event Listeners ---
+        // Preloader fallback timer
+        const PRELOADER_TIMEOUT = 5000; // 5 seconds
+        let preloaderTimeoutId;
+
+        window.addEventListener('load', () => {
+            clearTimeout(preloaderTimeoutId);
+            setTimeout(() => {
+                hidePreloader();
+            }, 1000);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            preloaderTimeoutId = setTimeout(() => {
+                console.warn("Preloader timed out. Hiding it forcibly.");
+                hidePreloader();
+                showToast("Page loaded with some delays.");
+            }, PRELOADER_TIMEOUT);
+
+            createParticles();
+            loadLottieAnimation();
+            initTiltEffect();
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggle.innerHTML = `<i class="fas fa-sun text-xl text-white"></i>`;
+            } else {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                    document.body.classList.add('light-theme');
+                    themeToggle.innerHTML = `<i class="fas fa-sun text-xl text-white"></i>`;
+                }
+            }
+            updateCardContent(currentMode);
+        });
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            themeToggle.innerHTML = `<i class="fas ${isLight ? 'fa-sun' : 'fa-moon'} text-xl text-white"></i>`;
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+
+        cardContainer.addEventListener('click', (e) => {
+            const interactiveElements = ['A', 'BUTTON', 'INPUT', 'SPAN', 'P', 'IMG', 'H1', 'H2', 'H3', 'DIV', 'UL', 'LI'];
+            if (e.target.closest(interactiveElements.map(tag => tag.toLowerCase()).join(','))) {
+                return;
+            }
+            flipCard();
+        });
+
+        let touchStartX = 0;
+        cardContainer.addEventListener('touchstart', (e) => {
+            const interactiveElements = ['A', 'BUTTON', 'INPUT'];
+            if (e.target.closest(interactiveElements.map(tag => tag.toLowerCase()).join(','))) {
+                touchStartX = 0;
+                return;
+            }
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        cardContainer.addEventListener('touchend', (e) => {
+            if (touchStartX === 0) return;
+            const touchEndX = e.changedTouches[0].clientX;
+            const deltaX = touchEndX - touchStartX;
+            if (Math.abs(deltaX) > 75) {
+                flipCard();
+            }
+            touchStartX = 0;
+        });
+
+        // Specific actions for Kids Safety Portal
+        callGuardianBtn.addEventListener('click', () => {
+            const primaryPhoneNumber = profileData["Safety Info"].phoneNumber;
+            if (primaryPhoneNumber) {
+                window.location.href = `tel:${primaryPhoneNumber.replace(/\s/g, '')}`; // Remove spaces for dialer
+                showToast(`Calling primary guardian at ${primaryPhoneNumber}...`);
+            } else {
+                showToast("Primary guardian phone number not available.");
+            }
+            triggerHapticFeedback();
+        });
+
+        reportFoundBtn.addEventListener('click', () => {
+            const childName = profileData["Safety Info"].name;
+            const childID = profileData["Safety Info"].childID;
+            const primaryEmail = profileData["Safety Info"].emailAddress;
+
+            if (primaryEmail) {
+                const subject = `Child Found: ${childName} (ID: ${childID})`;
+                const body = `Dear Guardian,\n\nThis is an automated report from the Kids Safety Portal. Your child, ${childName} (ID: ${childID}), has been found.\n\nPlease contact me immediately at [Your Name] and [Your Phone Number] to arrange for their safe return.\n\nThank you.`;
+                window.location.href = `mailto:${primaryEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                showToast("Opening email client to report...");
+            } else {
+                showToast("Guardian email not available for reporting.");
+            }
+            triggerHapticFeedback();
+        });
+
+        copyGuardianPhoneBackBtn.addEventListener('click', () => copyToClipboard(profileData["Safety Info"].phoneNumber));
+        copyGuardianEmailBackBtn.addEventListener('click', () => copyToClipboard(profileData["Safety Info"].emailAddress));
+
+
+        profileModeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                updateCardContent(button.dataset.mode);
+            });
+        });
+
+        aboutMeButton.addEventListener('click', () => {
+            gsap.to(backMainContent, {
+                opacity: 0,
+                duration: 0.4,
+                onComplete: () => {
+                    backMainContent.style.display = 'none';
+                    aboutSection.style.display = 'flex';
+                    gsap.fromTo(aboutSection,
+                        { opacity: 0 },
+                        {
+                            opacity: 1,
+                            duration: 0.4,
+                            onComplete: () => {
+                                aboutSection.style.pointerEvents = 'auto';
+                            }
+                        }
+                    );
+                }
+            });
+        });
+
+        backToMainBack.addEventListener('click', () => {
+            gsap.to(aboutSection, {
+                opacity: 0,
+                duration: 0.4,
+                onComplete: () => {
+                    aboutSection.style.display = 'none';
+                    aboutSection.style.pointerEvents = 'none';
+
+                    backMainContent.style.display = 'flex';
+                    gsap.fromTo(backMainContent,
+                        { opacity: 0 },
+                        {
+                            opacity: 1,
+                            duration: 0.4,
+                        }
+                    );
+                }
+            });
+        });
+    </script>
+</body>
+</html>
